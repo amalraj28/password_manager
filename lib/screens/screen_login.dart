@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:password_manager/models/data_models.dart';
 import 'package:password_manager/screens/screen_main.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -39,9 +38,7 @@ class LoginScreen extends StatelessWidget {
               ElevatedButton.icon(
                   icon: const Icon(Icons.check),
                   label: const Text('Login'),
-                  onPressed: () {
-                    actionOnButtonPressed(context);
-                  })
+                  onPressed: () => actionOnButtonPressed(context))
             ],
           ),
         ));
@@ -51,22 +48,27 @@ class LoginScreen extends StatelessWidget {
     final user = _userController.text;
     final pwd = _pwdController.text;
     const emptyFields = 'One or more fields are empty';
-    const incorrectData = 'Username and password are incorrect';
+    const incorrectData = 'Username and password do not match';
 
     if (user.isEmpty || pwd.isEmpty) {
       ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
         content: Text(emptyFields),
+        padding: EdgeInsets.all(10.0),
+        backgroundColor: Colors.red,
       ));
     } else if (user != pwd) {
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(
+          padding: EdgeInsets.all(10.0),
+          backgroundColor: Colors.red,
           content: Text(incorrectData),
         ),
       );
     } else {
-      Navigator.of(ctx).pushReplacement(
-          MaterialPageRoute(builder: (ctx1) => const MainScreen()));
+      Navigator.of(ctx)
+          .push(MaterialPageRoute(builder: (ctx1) => const MainScreen()));
+      _userController.clear();
+      _pwdController.clear();
     }
-    // DataModel(username: user, password: pwd);
   }
 }
