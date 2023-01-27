@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:password_manager/screens/screen_home.dart';
+import 'package:password_manager/screens/screen_splash.dart';
 import 'package:password_manager/screens/screen_login.dart';
 
 void main() {
@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
 			theme: ThemeData(
 				primarySwatch: Colors.lightGreen,
 			),
-			home: LoginScreen()
+			home: const HomeScreen(),
+			debugShowCheckedModeBanner: false,
 		);
 	}
 }
