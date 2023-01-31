@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:password_manager/screens/screen_login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -8,12 +10,11 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Welcome'),
-        leading: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back)),
+        leading:
+            IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => logout(context),
             child: const Text(
               'Logout',
               style: TextStyle(
@@ -29,5 +30,12 @@ class MainScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void logout(BuildContext ctx) async {
+    final sharedPrefs = await SharedPreferences.getInstance();
+    await sharedPrefs.clear();
+    Navigator.of(ctx).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (ctx1) => LoginScreen()), (route) => false);
   }
 }

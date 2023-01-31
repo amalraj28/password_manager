@@ -5,6 +5,8 @@ void main() {
   runApp(const MyApp());
 }
 
+const LOGIN_STATUS = 'user_logged_in';
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

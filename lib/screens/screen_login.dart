@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:password_manager/main.dart';
 import 'package:password_manager/screens/screen_main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -44,7 +46,7 @@ class LoginScreen extends StatelessWidget {
         ));
   }
 
-  void actionOnButtonPressed(BuildContext ctx) {
+  void actionOnButtonPressed(BuildContext ctx) async {
     final user = _userController.text;
     final pwd = _pwdController.text;
     const emptyFields = 'One or more fields are empty';
@@ -65,6 +67,9 @@ class LoginScreen extends StatelessWidget {
         ),
       );
     } else {
+      final sharedPrefs = await SharedPreferences.getInstance();
+      final userLoggedIn = await sharedPrefs.setBool(LOGIN_STATUS, true);
+
       Navigator.of(ctx)
           .push(MaterialPageRoute(builder: (ctx1) => const MainScreen()));
       _userController.clear();
