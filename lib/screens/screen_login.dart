@@ -69,9 +69,7 @@ class LoginScreen extends StatelessWidget {
     } else {
       final sharedPrefs = await SharedPreferences.getInstance();
       final userLoggedIn = await sharedPrefs.setBool(LOGIN_STATUS, true);
-
-      Navigator.of(ctx)
-          .push(MaterialPageRoute(builder: (ctx1) => const MainScreen()));
+      Navigator.of(ctx).popAndPushNamed('/main');
       _userController.clear();
       _pwdController.clear();
     }

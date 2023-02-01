@@ -4,14 +4,14 @@ import 'package:password_manager/screens/screen_login.dart';
 import 'package:password_manager/screens/screen_main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -42,8 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> goToLoginPage(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 3));
-    Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (ctx) => LoginScreen()));
+    Navigator.of(context).popAndPushNamed('/login');
   }
 
   Future<void> checkUserLoggedIn() async {
@@ -53,12 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (loginStatus == null || loginStatus == false) {
       goToLoginPage(context);
     } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (ctx) => const MainScreen(),
-        ),
-        (route) => false,
-      );
+      Navigator.of(context).popAndPushNamed('/main');
     }
   }
 }

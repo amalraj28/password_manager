@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:password_manager/screens/screen_login.dart';
+import 'package:password_manager/screens/screen_main.dart';
 import 'package:password_manager/screens/screen_splash.dart';
 
 void main() {
@@ -16,8 +18,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/splash': (context) => const SplashScreen(),
+        '/login': (context) => LoginScreen(),
+        '/main': (context) => const MainScreen()
+      },
     );
   }
 }
