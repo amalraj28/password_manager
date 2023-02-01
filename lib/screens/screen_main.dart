@@ -10,8 +10,6 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Welcome'),
-        leading:
-            IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back)),
         actions: [
           TextButton(
             onPressed: () => logout(context),
