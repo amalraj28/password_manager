@@ -22,10 +22,26 @@ class MainScreen extends StatelessWidget {
           )
         ],
       ),
-      body: const SafeArea(
+      body: SafeArea(
         child: Center(
-          child: Text('Welcome'),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/display_passwords');
+              },
+              child: const Text('Show saved passwords'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/create_entry');
+              },
+              child: const Text('Create a new entry'),
+            ),
+          ],
+        )),
       ),
     );
   }

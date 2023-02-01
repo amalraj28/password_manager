@@ -32,15 +32,17 @@ class LoginScreen extends StatelessWidget {
                 obscureText: true,
                 controller: _pwdController,
                 decoration: const InputDecoration(
-                    label: Text('Password'),
-                    border: OutlineInputBorder(),
-                    hintText: 'Password'),
+                  label: Text('Password'),
+                  border: OutlineInputBorder(),
+                  hintText: 'Password',
+                ),
               ),
               const SizedBox(height: 10),
               ElevatedButton.icon(
-                  icon: const Icon(Icons.check),
-                  label: const Text('Login'),
-                  onPressed: () => actionOnButtonPressed(context))
+                icon: const Icon(Icons.check),
+                label: const Text('Login'),
+                onPressed: () => actionOnButtonPressed(context),
+              ),
             ],
           ),
         ));
@@ -68,7 +70,7 @@ class LoginScreen extends StatelessWidget {
       );
     } else {
       final sharedPrefs = await SharedPreferences.getInstance();
-      final userLoggedIn = await sharedPrefs.setBool(LOGIN_STATUS, true);
+      await sharedPrefs.setBool(LOGIN_STATUS, true);
       Navigator.of(ctx).popAndPushNamed('/main');
       _userController.clear();
       _pwdController.clear();
