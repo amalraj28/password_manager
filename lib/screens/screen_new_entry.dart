@@ -14,6 +14,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
   final _usernameFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _platformFocus = FocusNode();
+  final _sizedBoxPadding = 15.0;
   late bool _isButtonEnabled;
 
   @override
@@ -62,7 +63,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               });
             },
           ),
-          const SizedBox(height: 10.0),
+          SizedBox(height: _sizedBoxPadding),
           TextFormField(
               focusNode: _usernameFocus,
               onTapOutside: (event) => _usernameFocus.unfocus(),
@@ -82,7 +83,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
                   _isButtonEnabled = dataInAllFields();
                 });
               }),
-          const SizedBox(height: 10.0),
+          SizedBox(height: _sizedBoxPadding),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -121,7 +122,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               ),
             ],
           ),
-          const SizedBox(height: 10.0),
+          SizedBox(height: _sizedBoxPadding),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
