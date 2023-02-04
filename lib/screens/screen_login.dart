@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager/main.dart';
-import 'package:password_manager/screens/screen_main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -71,7 +70,9 @@ class LoginScreen extends StatelessWidget {
     } else {
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool(LOGIN_STATUS, true);
-      Navigator.of(ctx).popAndPushNamed('/main');
+      if (ctx.mounted) {
+        Navigator.of(ctx).popAndPushNamed('/main');
+      }
       _userController.clear();
       _pwdController.clear();
     }

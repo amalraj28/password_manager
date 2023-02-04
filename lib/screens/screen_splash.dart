@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager/main.dart';
-import 'package:password_manager/screens/screen_login.dart';
-import 'package:password_manager/screens/screen_main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -42,14 +40,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> goToLoginPage(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 3));
-    Navigator.of(context).popAndPushNamed('/login');
+    if (context.mounted) {
+      Navigator.of(context).popAndPushNamed('/login');
+    }
   }
 
   Future<void> checkUserLoggedIn() async {
     final sharedPrefs = await SharedPreferences.getInstance();
     final loginStatus = sharedPrefs.getBool(LOGIN_STATUS);
 
-    if (loginStatus == null || loginStatus == false) {
+    if ((loginStatus == null || loginStatus == false) && context.mounted) {
       goToLoginPage(context);
     } else {
       Navigator.of(context).popAndPushNamed('/main');
