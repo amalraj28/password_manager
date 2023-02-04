@@ -83,26 +83,43 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
                 });
               }),
           const SizedBox(height: 10.0),
-          TextFormField(
-            focusNode: _passwordFocus,
-            onTapOutside: (event) => _passwordFocus.unfocus(),
-            obscureText: false,
-            controller: _passwordController,
-            onChanged: (text) {
-              setState(() {
-                _isButtonEnabled = dataInAllFields();
-              });
-            },
-            decoration: const InputDecoration(
-              label: Text('Password'),
-              // hintText: 'The platform whose credentials are to be set',
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.blue,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Expanded(
+                child: TextFormField(
+                  focusNode: _passwordFocus,
+                  onTapOutside: (event) => _passwordFocus.unfocus(),
+                  obscureText: false,
+                  controller: _passwordController,
+                  onChanged: (text) {
+                    setState(() {
+                      _isButtonEnabled = dataInAllFields();
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    label: Text('Password'),
+                    // hintText: 'The platform whose credentials are to be set',
+                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              TextButton(
+                onPressed: () {
+                  // _passwordController.text = 'hello';
+                  // _passwordFocus.requestFocus();
+                },
+                child: const Text(
+                  'Generate Password',
+                  style: TextStyle(backgroundColor: Colors.cyanAccent),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10.0),
           Row(
