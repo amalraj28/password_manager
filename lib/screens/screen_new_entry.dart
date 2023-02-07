@@ -1,3 +1,4 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:password_manager/scripts/password_generator.dart';
 
@@ -113,8 +114,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               ),
               TextButton(
                 onPressed: () {
-                  _passwordController.text = generatePassword();
-                  _passwordFocus.requestFocus();
+                  _generatePasswordButtonExecution(context);
                 },
                 child: const Text(
                   'Generate Password',
@@ -158,7 +158,6 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 const Text('The following data was entered: '),
                 const SizedBox(height: 5.0),
@@ -242,5 +241,18 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     } else {
       return false;
     }
+  }
+
+  void _generatePasswordButtonExecution(BuildContext ctx) {
+    _passwordController.text = generatePassword();
+    // _passwordFocus.requestFocus();
+    FlutterClipboard.copy(_passwordController.text);
+    ScaffoldMessenger.of(ctx).showSnackBar(
+      SnackBar(
+        content: const Text('Password Copied to Clipboard'),
+        backgroundColor: Colors.green.shade400,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 }
