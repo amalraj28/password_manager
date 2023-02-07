@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/main': (context) => const MainScreen(),
         '/display_passwords': (context) => const DisplayPasswords(),
-        '/create_entry': (context) => CreateNewEntry(),
+        '/create_entry': (context) => const CreateNewEntry(),
       },
     );
   }
