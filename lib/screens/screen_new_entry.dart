@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:password_manager/scripts/password_generator.dart';
 
 class CreateNewEntry extends StatefulWidget {
   const CreateNewEntry({super.key});
@@ -112,8 +113,8 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               ),
               TextButton(
                 onPressed: () {
-                  // _passwordController.text = 'hello';
-                  // _passwordFocus.requestFocus();
+                  _passwordController.text = generatePassword();
+                  _passwordFocus.requestFocus();
                 },
                 child: const Text(
                   'Generate Password',
