@@ -49,7 +49,10 @@ class MainScreen extends StatelessWidget {
   void logout(BuildContext ctx) async {
     final sharedPrefs = await SharedPreferences.getInstance();
     await sharedPrefs.clear();
-    Navigator.of(ctx).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (ctx1) => LoginScreen()), (route) => false);
+    if (ctx.mounted) {
+      Navigator.of(ctx).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (ctx1) => LoginScreen()),
+          (route) => false);
+    }
   }
 }
