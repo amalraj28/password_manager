@@ -245,7 +245,9 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
 
   void _generatePasswordButtonExecution(BuildContext ctx) {
     _passwordController.text = generatePassword();
-    // _passwordFocus.requestFocus();
+    setState(() {
+      _isButtonEnabled = _dataInAllFields();
+    });
     FlutterClipboard.copy(_passwordController.text);
     ScaffoldMessenger.of(ctx).showSnackBar(
       SnackBar(
