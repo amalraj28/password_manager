@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    checkUserLoggedIn();
+    _checkUserLoggedIn();
   }
 
   @override
@@ -38,19 +38,19 @@ class _SplashScreenState extends State<SplashScreen> {
     ));
   }
 
-  Future<void> goToLoginPage(BuildContext context) async {
+  Future<void> _goToLoginPage(BuildContext context) async {
     await Future.delayed(const Duration(seconds: 3));
     if (context.mounted) {
       Navigator.of(context).popAndPushNamed('/login');
     }
   }
 
-  Future<void> checkUserLoggedIn() async {
+  Future<void> _checkUserLoggedIn() async {
     final sharedPrefs = await SharedPreferences.getInstance();
     final loginStatus = sharedPrefs.getBool(LOGIN_STATUS);
 
     if ((loginStatus == null || loginStatus == false) && context.mounted) {
-      goToLoginPage(context);
+      _goToLoginPage(context);
     } else {
       Navigator.of(context).popAndPushNamed('/main');
     }

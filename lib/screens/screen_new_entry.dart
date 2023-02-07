@@ -60,7 +60,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
             ),
             onChanged: (text) {
               setState(() {
-                _isButtonEnabled = dataInAllFields();
+                _isButtonEnabled = _dataInAllFields();
               });
             },
           ),
@@ -81,7 +81,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               ),
               onChanged: (text) {
                 setState(() {
-                  _isButtonEnabled = dataInAllFields();
+                  _isButtonEnabled = _dataInAllFields();
                 });
               }),
           SizedBox(height: _sizedBoxPadding),
@@ -96,7 +96,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
                   controller: _passwordController,
                   onChanged: (text) {
                     setState(() {
-                      _isButtonEnabled = dataInAllFields();
+                      _isButtonEnabled = _dataInAllFields();
                     });
                   },
                   decoration: const InputDecoration(
@@ -130,14 +130,14 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               ElevatedButton(
                 onPressed: _isButtonEnabled
                     ? () {
-                        onSubmit(context);
+                        _onSubmit(context);
                       }
                     : null,
                 child: const Text('Submit'),
               ),
               ElevatedButton(
                 onPressed: () {
-                  onReset(context);
+                  _onReset(context);
                 },
                 child: const Text('Reset'),
               ),
@@ -148,7 +148,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     );
   }
 
-  onSubmit(BuildContext ctx) {
+  _onSubmit(BuildContext ctx) {
     showDialog(
       context: ctx,
       builder: (ctx1) {
@@ -179,7 +179,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
             ),
             TextButton(
               onPressed: () {
-                savedSuccess(ctx);
+                _savedSuccess(ctx);
                 Navigator.of(ctx1).pop();
               },
               child: const Text('Yes'),
@@ -190,7 +190,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     );
   }
 
-  onReset(BuildContext ctx) {
+  _onReset(BuildContext ctx) {
     showDialog(
       context: ctx,
       builder: (ctx1) {
@@ -203,7 +203,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
             ),
             TextButton(
               onPressed: () {
-                clearControllers();
+                _clearControllers();
                 Navigator.of(ctx1).pop();
               },
               child: const Text('Yes'),
@@ -214,7 +214,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     );
   }
 
-  clearControllers() {
+  _clearControllers() {
     _passwordController.clear();
     _usernameController.clear();
     _platformController.clear();
@@ -223,16 +223,16 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     });
   }
 
-  savedSuccess(BuildContext ctx) {
+  _savedSuccess(BuildContext ctx) {
     ScaffoldMessenger.of(ctx).showSnackBar(
       const SnackBar(
         content: Text('Data Saved Successfully'),
       ),
     );
-    clearControllers();
+    _clearControllers();
   }
 
-  bool dataInAllFields() {
+  bool _dataInAllFields() {
     final pwd = _passwordController.text;
     final username = _usernameController.text;
     final platform = _platformController.text;

@@ -40,14 +40,14 @@ class LoginScreen extends StatelessWidget {
               ElevatedButton.icon(
                 icon: const Icon(Icons.check),
                 label: const Text('Login'),
-                onPressed: () => actionOnButtonPressed(context),
+                onPressed: () => _actionOnButtonPressed(context),
               ),
             ],
           ),
         ));
   }
 
-  void actionOnButtonPressed(BuildContext ctx) async {
+  void _actionOnButtonPressed(BuildContext ctx) async {
     final user = _userController.text;
     final pwd = _pwdController.text;
     const emptyFields = 'One or more fields are empty';

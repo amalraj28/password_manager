@@ -12,7 +12,7 @@ class MainScreen extends StatelessWidget {
         title: const Text('Welcome'),
         actions: [
           TextButton(
-            onPressed: () => logout(context),
+            onPressed: () => _logout(context),
             child: const Text(
               'Logout',
               style: TextStyle(
@@ -46,7 +46,7 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  void logout(BuildContext ctx) async {
+  void _logout(BuildContext ctx) async {
     final sharedPrefs = await SharedPreferences.getInstance();
     await sharedPrefs.clear();
     if (ctx.mounted) {
