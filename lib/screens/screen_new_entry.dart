@@ -1,5 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
+import 'package:password_manager/db/database.dart';
+import 'package:password_manager/models/data_models.dart';
 import 'package:password_manager/scripts/password_generator.dart';
 
 class CreateNewEntry extends StatefulWidget {
@@ -26,8 +28,8 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -223,6 +225,12 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
   }
 
   _savedSuccess(BuildContext ctx) {
+    final pwd = _passwordController.text;
+    final user = _usernameController.text;
+    final platform = _platformController.text;
+
+    UserDatabase.addData(platform: platform, username: user, password: pwd);
+
     ScaffoldMessenger.of(ctx).showSnackBar(
       const SnackBar(
         content: Text('Data Saved Successfully'),

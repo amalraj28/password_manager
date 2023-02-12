@@ -1,6 +1,10 @@
-class DataModel{
-	final String username;
-	final String password;
+import 'package:realm/realm.dart';
 
-	DataModel({required this.username, required this.password});
+part 'data_models.g.dart';
+
+@RealmModel()
+class _DataModel {
+  late String username;
+  late String password;
+  late String platform;
 }
