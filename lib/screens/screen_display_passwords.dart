@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager/db/database.dart';
-import 'package:password_manager/models/data_models.dart';
-import 'package:realm/realm.dart';
 
-class DisplayPasswords extends StatelessWidget {
+late bool isDataAvailable;
+
+class DisplayPasswords extends StatefulWidget {
   const DisplayPasswords({super.key});
 
   @override
+  State<DisplayPasswords> createState() => _DisplayPasswordsState();
+}
+
+class _DisplayPasswordsState extends State<DisplayPasswords> {
+  @override
   Widget build(BuildContext context) {
-    var data = readDatabase();
+    setState(() {
+      isDataAvailable = UserDatabase.checkIfDataPresent();
+    });
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -17,24 +24,77 @@ class DisplayPasswords extends StatelessWidget {
           },
           icon: const Icon(Icons.arrow_back),
         ),
+        actions: [
+          Visibility(
+            visible: isDataAvailable,
+            child: TextButton(
+              onPressed: () {
+                displayDeletionWarning(context);
+              },
+              child: const Text(
+                'Clear Data',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      body: ListView.separated(
-        itemBuilder: (ctx, index) {
-          return ListTile(
-            title: Text(data[index].platform),
-            subtitle: Text(data[index].username),
-          );
-        },
-        separatorBuilder: (ctx, index) => const Divider(),
-        itemCount: data.length,
-      ),
+      body: isDataAvailable ? displayList() : noDataScreen(),
     );
   }
 
-  List<DataModel> readDatabase() {
-    var realm = UserDatabase.openDatabase();
+  displayList() {
     var data = UserDatabase.getData();
-    realm.close();
-    return data;
+    return ListView.separated(
+      itemBuilder: (ctx, index) {
+        return ListTile(
+          title: Text(data[index].platform),
+          subtitle: Text(data[index].username),
+        );
+      },
+      separatorBuilder: (ctx, index) => const Divider(),
+      itemCount: data.length,
+    );
+  }
+
+  noDataScreen() {
+    return const Center(
+      child: Text('Stored Passwords will be displayed here'),
+    );
+  }
+
+  clearDatabase() {
+    setState(() {
+      isDataAvailable = false;
+    });
+    UserDatabase.clearData();
+  }
+
+  displayDeletionWarning(BuildContext ctx) {
+    showDialog(
+      context: ctx,
+      builder: (ctx1) {
+        return AlertDialog(
+          title: const Text('Warning!!!'),
+          content: const Text(
+              'This will delete all user data from the database. Do you wish to continue?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx1).pop(),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                clearDatabase();
+                Navigator.of(ctx1).pop();
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
