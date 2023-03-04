@@ -13,16 +13,36 @@ class UserDatabase {
     var realm = openDatabase();
     await Future.sync(() {
       realm.write(() {
-        realm.add(DataModel(username, password, platform));
+        realm.add(
+          DataModel(username, password, platform),
+        );
       });
     });
     realm.close();
   }
 
-  static List<DataModel> getData() {
-    Realm realm = openDatabase();
-    List<DataModel> items = realm.all<DataModel>().toList();
-    // closeDatabase(realm);
+  static void clearData() async {
+    var realm = openDatabase();
+    await Future.sync(() {
+      realm.write(() {
+        realm.deleteAll<DataModel>();
+      });
+    });
+    realm.close();
+  }
+
+  static getData() {
+    Realm realm = UserDatabase.openDatabase();
+    var items = realm.all<DataModel>();
     return items;
+  }
+
+  static checkIfDataPresent() {
+    var items = UserDatabase.getData();
+    if (items.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
