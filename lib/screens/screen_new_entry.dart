@@ -44,36 +44,17 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextFormField(
-            focusNode: _platformFocus,
-            onTapOutside: (event) => _platformFocus.unfocus(),
-            controller: _platformController,
-            decoration: const InputDecoration(
-              label: Text('Website/App/Platform'),
-              // hintText: 'The platform whose credentials are to be set',
-              border: OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.blue,
-                ),
-              ),
-            ),
-            onChanged: (text) {
-              setState(() {
-                _isButtonEnabled = _dataInAllFields();
-              });
-            },
-          ),
-          SizedBox(height: _sizedBoxPadding),
-          TextFormField(
-              focusNode: _usernameFocus,
-              onTapOutside: (event) => _usernameFocus.unfocus(),
-              controller: _usernameController,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextFormField(
+              focusNode: _platformFocus,
+              onTapOutside: (event) => _platformFocus.unfocus(),
+              controller: _platformController,
               decoration: const InputDecoration(
-                label: Text('Username/Email'),
+                label: Text('Website/App/Platform'),
                 // hintText: 'The platform whose credentials are to be set',
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
@@ -86,66 +67,88 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
                 setState(() {
                   _isButtonEnabled = _dataInAllFields();
                 });
-              }),
-          SizedBox(height: _sizedBoxPadding),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Expanded(
-                child: TextFormField(
-                  focusNode: _passwordFocus,
-                  onTapOutside: (event) => _passwordFocus.unfocus(),
-                  obscureText: false,
-                  controller: _passwordController,
-                  onChanged: (text) {
-                    setState(() {
-                      _isButtonEnabled = _dataInAllFields();
-                    });
-                  },
-                  decoration: const InputDecoration(
-                    label: Text('Password'),
-                    // hintText: 'The platform whose credentials are to be set',
-                    border: OutlineInputBorder(),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.blue,
+              },
+            ),
+            SizedBox(height: _sizedBoxPadding),
+            TextFormField(
+                focusNode: _usernameFocus,
+                onTapOutside: (event) => _usernameFocus.unfocus(),
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  label: Text('Username/Email'),
+                  // hintText: 'The platform whose credentials are to be set',
+                  border: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    _isButtonEnabled = _dataInAllFields();
+                  });
+                }),
+            SizedBox(height: _sizedBoxPadding),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Expanded(
+                  child: TextFormField(
+                    focusNode: _passwordFocus,
+                    onTapOutside: (event) => _passwordFocus.unfocus(),
+                    obscureText: false,
+                    controller: _passwordController,
+                    onChanged: (text) {
+                      setState(() {
+                        _isButtonEnabled = _dataInAllFields();
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      label: Text('Password'),
+                      // hintText: 'The platform whose credentials are to be set',
+                      border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.blue,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              TextButton(
-                onPressed: () {
-                  _generatePasswordButtonExecution(context);
-                },
-                child: const Text(
-                  'Generate Password',
-                  style: TextStyle(backgroundColor: Colors.cyanAccent),
+                TextButton(
+                  onPressed: () {
+                    _generatePasswordButtonExecution(context);
+                  },
+                  child: const Text(
+                    'Generate Password',
+                    style: TextStyle(backgroundColor: Colors.cyanAccent),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: _sizedBoxPadding),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: _isButtonEnabled
-                    ? () {
-                        _onSubmit(context);
-                      }
-                    : null,
-                child: const Text('Submit'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _onReset(context);
-                },
-                child: const Text('Reset'),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            SizedBox(height: _sizedBoxPadding),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _isButtonEnabled
+                      ? () {
+                          _onSubmit(context);
+                        }
+                      : null,
+                  child: const Text('Submit'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _onReset(context);
+                  },
+                  child: const Text('Reset'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -234,6 +237,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     ScaffoldMessenger.of(ctx).showSnackBar(
       const SnackBar(
         content: Text('Data Saved Successfully'),
+        duration: Duration(seconds: 1),
       ),
     );
     _clearControllers();
