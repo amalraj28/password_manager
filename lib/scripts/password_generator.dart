@@ -11,7 +11,7 @@ List<String> _generateAlphabets() {
   return alphabets;
 }
 
-String generatePassword({length = const [15, 22]}) {
+String generatePassword() {
   List<String> symbols = [
     '!',
     '@',
