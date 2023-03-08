@@ -46,4 +46,21 @@ class UserDatabase {
       return true;
     }
   }
+
+  static findItemFromDb({required String key}) {
+    Realm realm = _openDatabase();
+    // bool deleted;
+    var data = realm.find<DataModel>(key);
+    realm.close();
+    return data;
+  }
+
+  static deleteItemFromDb(key) {
+    Realm realm = _openDatabase();
+    var data = realm.find<DataModel>(key)!;
+    realm.write(() {
+      realm.delete<DataModel>(data);
+    });
+    realm.close();
+  }
 }
