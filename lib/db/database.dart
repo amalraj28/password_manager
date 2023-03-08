@@ -2,15 +2,16 @@ import 'package:password_manager/models/data_models.dart';
 import 'package:realm/realm.dart';
 
 class UserDatabase {
-  static Realm openDatabase() {
-    final Configuration config = Configuration.local([DataModel.schema]);
+  static Realm _openDatabase() {
+    final Configuration config = Configuration.local([DataModel.schema],
+        schemaVersion: 1, shouldDeleteIfMigrationNeeded: true);
     final Realm realm = Realm(config);
     return realm;
   }
 
   static Future<void> addData(
       {platform = String, username = String, password = String}) async {
-    var realm = openDatabase();
+    var realm = _openDatabase();
     await Future.sync(() {
       realm.write(() {
         realm.add(
@@ -22,7 +23,7 @@ class UserDatabase {
   }
 
   static void clearData() async {
-    var realm = openDatabase();
+    var realm = _openDatabase();
     await Future.sync(() {
       realm.write(() {
         realm.deleteAll<DataModel>();
@@ -32,7 +33,7 @@ class UserDatabase {
   }
 
   static getData() {
-    Realm realm = UserDatabase.openDatabase();
+    Realm realm = _openDatabase();
     var items = realm.all<DataModel>();
     return items;
   }
