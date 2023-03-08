@@ -6,5 +6,6 @@ part 'data_models.g.dart';
 class _DataModel {
   late String username;
   late String password;
+  @PrimaryKey()
   late String platform;
 }
