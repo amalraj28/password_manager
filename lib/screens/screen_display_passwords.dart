@@ -52,6 +52,15 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         return ListTile(
           title: Text(data[index].platform),
           subtitle: Text(data[index].username),
+          trailing: IconButton(
+            onPressed: () {
+              deleteFromDatabase(data[index].platform, ctx);
+            },
+            icon: const Icon(
+              Icons.delete_rounded,
+              color: Colors.redAccent,
+            ),
+          ),
         );
       },
       separatorBuilder: (ctx, index) => const Divider(),
@@ -88,6 +97,33 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
             TextButton(
               onPressed: () {
                 clearDatabase();
+                Navigator.of(ctx1).pop();
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  deleteFromDatabase(platform, ctx) {
+    showDialog(
+      context: ctx,
+      builder: (ctx1) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure to delete this entry?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx1).pop(),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  UserDatabase.deleteItemFromDb(platform);
+                });
                 Navigator.of(ctx1).pop();
               },
               child: const Text('Yes'),
