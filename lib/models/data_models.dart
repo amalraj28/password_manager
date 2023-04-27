@@ -9,3 +9,10 @@ class _DataModel {
   @PrimaryKey()
   late String platform;
 }
+
+@RealmModel()
+class _PasswordSalt {
+  @PrimaryKey()
+  late String platform;
+  late String salt;
+}
