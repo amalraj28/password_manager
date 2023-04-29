@@ -15,4 +15,5 @@ class _PasswordSalt {
   @PrimaryKey()
   late String platform;
   late String salt;
+  late String iv;
 }
