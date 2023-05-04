@@ -1,6 +1,7 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:password_manager/db/database.dart';
+import 'package:password_manager/encryption/encryption.dart';
 import 'package:password_manager/models/data_models.dart';
 import 'package:password_manager/scripts/password_generator.dart';
 
@@ -20,6 +21,7 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
   final _platformFocus = FocusNode();
   final _sizedBoxPadding = 15.0;
   late bool _isButtonEnabled;
+  late bool _duplicatePlatform;
 
   @override
   void initState() {
@@ -55,7 +57,6 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               controller: _platformController,
               decoration: const InputDecoration(
                 label: Text('Website/App/Platform'),
-                // hintText: 'The platform whose credentials are to be set',
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
@@ -76,7 +77,6 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
                 controller: _usernameController,
                 decoration: const InputDecoration(
                   label: Text('Username/Email'),
-                  // hintText: 'The platform whose credentials are to be set',
                   border: OutlineInputBorder(),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
@@ -106,7 +106,6 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
                     },
                     decoration: const InputDecoration(
                       label: Text('Password'),
-                      // hintText: 'The platform whose credentials are to be set',
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -227,19 +226,32 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     });
   }
 
-  _savedSuccess(BuildContext ctx) {
-    final pwd = _passwordController.text;
+  _savedSuccess(BuildContext ctx) async {
     final user = _usernameController.text;
-    final platform = _platformController.text;
+    final platform = _platformController.text.toUpperCase();
 
-    UserDatabase.addData(platform: platform, username: user, password: pwd);
+    var encryptedData = await Encryption.encryptText(_passwordController.text);
 
-    ScaffoldMessenger.of(ctx).showSnackBar(
-      const SnackBar(
-        content: Text('Data Saved Successfully'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    final encryptedPassword = encryptedData[0].base64;
+    final salt = encryptedData[1];
+    final iv = encryptedData[2].base64;
+
+    PasswordSalt pwdMetadata = PasswordSalt(platform, salt, iv);
+    DataModel userData = DataModel(user, encryptedPassword, platform);
+
+    _duplicatePlatform = await UserDatabase.addData(
+        data: userData, encryptionMetadata: pwdMetadata);
+
+    if (_duplicatePlatform) {
+      // Error correction has to be written here
+    } else if (ctx.mounted) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text('Data Saved Successfully'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
     _clearControllers();
   }
 
