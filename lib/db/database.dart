@@ -3,23 +3,32 @@ import 'package:realm/realm.dart';
 
 class UserDatabase {
   static Realm _openDatabase() {
-    final Configuration config = Configuration.local([DataModel.schema],
+    final Configuration config = Configuration.local(
+        [DataModel.schema, PasswordSalt.schema],
         schemaVersion: 1, shouldDeleteIfMigrationNeeded: true);
     final Realm realm = Realm(config);
     return realm;
   }
 
-  static Future<void> addData(
-      {platform = String, username = String, password = String}) async {
+  static addData(
+      {required DataModel data,
+      required PasswordSalt encryptionMetadata}) async {
     var realm = _openDatabase();
-    await Future.sync(() {
-      realm.write(() {
-        realm.add(
-          DataModel(username, password, platform),
-        );
+    bool duplicatePrimaryKey;
+    try {
+      await Future.sync(() {
+        realm.write(() {
+          realm.add(data);
+          realm.add(encryptionMetadata);
+        });
       });
-    });
-    realm.close();
+      duplicatePrimaryKey = false;
+    } on RealmException {
+      duplicatePrimaryKey = true;
+    } finally {
+      realm.close();
+    }
+    return duplicatePrimaryKey;
   }
 
   static void clearData() async {
@@ -27,6 +36,7 @@ class UserDatabase {
     await Future.sync(() {
       realm.write(() {
         realm.deleteAll<DataModel>();
+        realm.deleteAll<PasswordSalt>();
       });
     });
     realm.close();
@@ -49,18 +59,22 @@ class UserDatabase {
 
   static findItemFromDb({required String key}) {
     Realm realm = _openDatabase();
-    // bool deleted;
     var data = realm.find<DataModel>(key);
+    var metaData = realm.find<PasswordSalt>(key);
     realm.close();
-    return data;
+    return [data, metaData];
   }
 
   static deleteItemFromDb(key) {
     Realm realm = _openDatabase();
-    var data = realm.find<DataModel>(key)!;
+    var userData = realm.find<DataModel>(key);
+    var metaData = realm.find<PasswordSalt>(key);
+    if (userData == null || metaData == null) return;
     realm.write(() {
-      realm.delete<DataModel>(data);
+      realm.delete<DataModel>(userData);
+      realm.delete<PasswordSalt>(metaData);
     });
-    realm.close();
+
+    // realm.close();
   }
 }
