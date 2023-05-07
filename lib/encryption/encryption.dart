@@ -1,12 +1,15 @@
 import 'dart:math';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:password_manager/models/data_models.dart';
+import 'package:password_manager/db/database.dart';
 
 class Encryption {
+  // ignore: prefer_const_constructors
+  static final secureStorage = FlutterSecureStorage();
+
   static _getMasterPassword() async {
-    const FlutterSecureStorage storage = FlutterSecureStorage();
-    return await storage.read(key: 'key');
+    var s = await secureStorage.read(key: 'key');
+    return s;
   }
 
   static _generateRandomSalt(length) {
@@ -18,23 +21,44 @@ class Encryption {
     return salt;
   }
 
-  static encrypt(text) async {
+  static encryptText(text) async {
     var masterPass = await _getMasterPassword();
-    var salt = _generateRandomSalt(32 - text.length);
+    var salt = await _generateRandomSalt(32 - masterPass.length);
 
     final key = Key.fromUtf8('$masterPass$salt');
-    print(key);
     final iv = IV.fromSecureRandom(16);
-
     final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
     final encrypted = encrypter.encrypt(text, iv: iv);
 
     return [encrypted, salt, iv];
   }
 
-  static decrypt(Encrypted encrypter, PasswordSalt metadata) {
-    var key = Key.fromUtf8('${_getMasterPassword()}${metadata.salt}');
-    var decrypter = Encrypter(AES(key, mode: AESMode.cbc));
-    return decrypter.decrypt(encrypter, iv: IV.fromUtf8(metadata.iv));
+  static getDecryptedPassword(String platform) async {
+    // Get entry from database
+    var data = UserDatabase.findItemFromDb(key: platform);
+    var userData = data[0];
+    var metaData = data[1];
+
+    // Get salt and iv from metadata
+    String salt = metaData['salt'];
+    IV iv = IV.fromBase64(metaData['iv']);
+
+    // Get encrypted password from userData
+    var encryptPass = Encrypted.fromBase64(userData['password']);
+
+    // Get master Password
+    String masterPass = await _getMasterPassword();
+
+    // Get key
+    Key key = Key.fromUtf8('$masterPass$salt');
+
+    // Decrypt password
+    Encrypter encrypter = Encrypter(AES(key, mode: AESMode.cbc));
+    var pwd = encrypter.decrypt(encryptPass, iv: iv);
+    return pwd;
+  }
+
+  static masterPassword() async {
+    return _getMasterPassword();
   }
 }

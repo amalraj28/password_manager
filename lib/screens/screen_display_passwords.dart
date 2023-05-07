@@ -1,7 +1,9 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:password_manager/db/database.dart';
+import 'package:password_manager/encryption/encryption.dart';
 
-late bool isDataAvailable;
+late bool _isDataAvailable;
 
 class DisplayPasswords extends StatefulWidget {
   const DisplayPasswords({super.key});
@@ -14,7 +16,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
   @override
   Widget build(BuildContext context) {
     setState(() {
-      isDataAvailable = UserDatabase.checkIfDataPresent();
+      _isDataAvailable = UserDatabase.checkIfDataPresent();
     });
     return Scaffold(
       appBar: AppBar(
@@ -26,10 +28,10 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         ),
         actions: [
           Visibility(
-            visible: isDataAvailable,
+            visible: _isDataAvailable,
             child: TextButton(
               onPressed: () {
-                displayDeletionWarning(context);
+                _displayDeletionWarning(context);
               },
               child: const Text(
                 'Clear Data',
@@ -41,11 +43,11 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
           ),
         ],
       ),
-      body: isDataAvailable ? displayList() : noDataScreen(),
+      body: _isDataAvailable ? _displayList() : _noDataScreen(),
     );
   }
 
-  displayList() {
+  _displayList() {
     var data = UserDatabase.getData();
     return ListView.separated(
       itemBuilder: (ctx, index) {
@@ -54,13 +56,16 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
           subtitle: Text(data[index].username),
           trailing: IconButton(
             onPressed: () {
-              deleteFromDatabase(data[index].platform, ctx);
+              _deleteFromDatabase(data[index].platform, ctx);
             },
             icon: const Icon(
               Icons.delete_rounded,
               color: Colors.redAccent,
             ),
           ),
+          onTap: () => {
+            _enterMasterPassword(data[index].platform),
+          },
         );
       },
       separatorBuilder: (ctx, index) => const Divider(),
@@ -68,20 +73,20 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     );
   }
 
-  noDataScreen() {
+  _noDataScreen() {
     return const Center(
       child: Text('Stored Passwords will be displayed here'),
     );
   }
 
-  clearDatabase() {
+  _clearDatabase() {
     setState(() {
-      isDataAvailable = false;
+      _isDataAvailable = false;
     });
     UserDatabase.clearData();
   }
 
-  displayDeletionWarning(BuildContext ctx) {
+  _displayDeletionWarning(BuildContext ctx) {
     showDialog(
       context: ctx,
       builder: (ctx1) {
@@ -96,7 +101,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
             ),
             TextButton(
               onPressed: () {
-                clearDatabase();
+                _clearDatabase();
                 Navigator.of(ctx1).pop();
               },
               child: const Text('Yes'),
@@ -107,7 +112,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     );
   }
 
-  deleteFromDatabase(platform, ctx) {
+  _deleteFromDatabase(platform, ctx) {
     showDialog(
       context: ctx,
       builder: (ctx1) {
@@ -128,6 +133,117 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
               },
               child: const Text('Yes'),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  _enterMasterPassword(pltfm) {
+    showDialog(
+      context: context,
+      builder: (ctx1) {
+        var alertTextController = TextEditingController();
+        var textFieldFocusNode = FocusNode();
+        bool obscured = true;
+        bool isPwdCorrect = true;
+        final formKey = GlobalKey<FormState>();
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Confirm Password'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Form(
+                    key: formKey,
+                    child: TextFormField(
+                      controller: alertTextController,
+                      focusNode: textFieldFocusNode,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Password can\'t be empty';
+                        } else if (!isPwdCorrect) {
+                          return 'Incorrect Password Entered';
+                        } else {
+                          return null;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        border: const UnderlineInputBorder(),
+                        hintText: 'Enter Master Password',
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              obscured = !obscured;
+                            });
+                          },
+                          icon: Icon(
+                            obscured
+                                ? Icons.visibility_sharp
+                                : Icons.visibility_off_sharp,
+                          ),
+                        ),
+                      ),
+                      obscureText: obscured,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx1).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    var pwd = await _validatePassword(alertTextController.text,
+                        pltfm); // Why async and await here? Some expert help me figure it out!!!
+                    setState(() {
+                      isPwdCorrect = pwd;
+                    });
+                    if (formKey.currentState!.validate() && ctx1.mounted) {
+                      _displayPassword(pltfm, ctx1);
+                    }
+                  },
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  _validatePassword(String enteredPassword, String platform) async {
+    var mPass = await Encryption.masterPassword();
+    return (enteredPassword == mPass);
+  }
+
+  _displayPassword(platform, ctx) async {
+    Navigator.of(ctx).pop();
+
+    var pwd = await Encryption.getDecryptedPassword(platform);
+
+    // ignore: use_build_context_synchronously
+    return showDialog(
+      context: context,
+      builder: (ctx1) {
+        return AlertDialog(
+          title: const Text('Password'),
+          content: Text('Password:\n$pwd'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                FlutterClipboard.copy(pwd);
+                Navigator.of(ctx1).pop();
+              },
+              child: const Text('COPY'),
+            )
           ],
         );
       },

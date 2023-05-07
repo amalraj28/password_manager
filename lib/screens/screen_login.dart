@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:password_manager/encryption/encryption.dart';
 import 'package:password_manager/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  final _userController = TextEditingController();
   final _pwdController = TextEditingController();
 
   @override
@@ -19,15 +19,6 @@ class LoginScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
-                controller: _userController,
-                decoration: const InputDecoration(
-                  label: Text('Username or email'),
-                  border: OutlineInputBorder(),
-                  hintText: 'Username',
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
                 obscureText: true,
                 controller: _pwdController,
                 decoration: const InputDecoration(
@@ -40,7 +31,9 @@ class LoginScreen extends StatelessWidget {
               ElevatedButton.icon(
                 icon: const Icon(Icons.check),
                 label: const Text('Login'),
-                onPressed: () => _actionOnButtonPressed(context),
+                onPressed: () {
+                  _actionOnButtonPressed(context);
+                },
               ),
             ],
           ),
@@ -48,33 +41,40 @@ class LoginScreen extends StatelessWidget {
   }
 
   void _actionOnButtonPressed(BuildContext ctx) async {
-    final user = _userController.text;
     final pwd = _pwdController.text;
     const emptyFields = 'One or more fields are empty';
-    const incorrectData = 'Username and password do not match';
+    const wrongPassword = 'Wrong password. Please try again';
 
-    if (user.isEmpty || pwd.isEmpty) {
-      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-        content: Text(emptyFields),
-        padding: EdgeInsets.all(10.0),
-        backgroundColor: Colors.red,
-      ));
-    } else if (user != pwd) {
+    if (pwd.isEmpty) {
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(
+          content: Text(emptyFields),
           padding: EdgeInsets.all(10.0),
           backgroundColor: Colors.red,
-          content: Text(incorrectData),
         ),
       );
-    } else {
+    } else if (await _validateMasterPassword(_pwdController.text)) {
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool(LOGIN_STATUS, true);
       if (ctx.mounted) {
         Navigator.of(ctx).popAndPushNamed('/main');
       }
-      _userController.clear();
       _pwdController.clear();
+    } else {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text(wrongPassword),
+          padding: EdgeInsets.all(10.0),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  }
+
+  _validateMasterPassword(text) async {
+    var storage = Encryption.secureStorage;
+
+    if (await storage.read(key: 'key') == text) return true;
+    return false;
   }
 }
