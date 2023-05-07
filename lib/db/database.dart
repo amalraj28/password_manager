@@ -61,20 +61,39 @@ class UserDatabase {
     Realm realm = _openDatabase();
     var data = realm.find<DataModel>(key);
     var metaData = realm.find<PasswordSalt>(key);
+    var userData = Map.identity();
+    var userMetaData = Map.identity();
+    if (data != null) {
+      userData = {
+        'platform': data.platform,
+        'username': data.username,
+        'password': data.password
+      };
+    }
+
+    if (metaData != null) {
+      userMetaData = {
+        'platform': metaData.platform,
+        'salt': metaData.salt,
+        'iv': metaData.iv
+      };
+    }
     realm.close();
-    return [data, metaData];
+    return [userData, userMetaData];
   }
 
   static deleteItemFromDb(key) {
     Realm realm = _openDatabase();
     var userData = realm.find<DataModel>(key);
     var metaData = realm.find<PasswordSalt>(key);
+
     if (userData == null || metaData == null) return;
+
     realm.write(() {
       realm.delete<DataModel>(userData);
       realm.delete<PasswordSalt>(metaData);
     });
 
-    // realm.close();
+    realm.close();
   }
 }
