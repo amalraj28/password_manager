@@ -37,6 +37,9 @@ pubspec.lock
 /web/
 /windows/
 /lib/models/data_models.g.dart
+macos/Flutter/GeneratedPluginRegistrant.swift
+linux/flutter/generated_plugins.cmake
+linux/flutter/generated_plugin_registrant.cc
 
 # Symbolication related
 app.*.symbols
