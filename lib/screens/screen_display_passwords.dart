@@ -2,12 +2,12 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:password_manager/db/database.dart';
 import 'package:password_manager/encryption/encryption.dart';
+import 'package:password_manager/screens/screen_change_master_pass.dart';
 
 late bool _isDataAvailable;
 
 class DisplayPasswords extends StatefulWidget {
   const DisplayPasswords({super.key});
-
   @override
   State<DisplayPasswords> createState() => _DisplayPasswordsState();
 }
@@ -18,7 +18,19 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     setState(() {
       _isDataAvailable = UserDatabase.checkIfDataPresent();
     });
+
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.of(context).pushNamed('/create_entry');
+        },
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.green,
+        child: const Icon(
+          Icons.add,
+          size: 50,
+        ),
+      ),
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -26,20 +38,44 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
           },
           icon: const Icon(Icons.arrow_back),
         ),
+        title: const Text('Passwords Stored'),
         actions: [
-          Visibility(
-            visible: _isDataAvailable,
-            child: TextButton(
-              onPressed: () {
-                _displayDeletionWarning(context);
-              },
-              child: const Text(
-                'Clear Data',
-                style: TextStyle(
-                  color: Colors.white,
+          // Visibility(
+          //   visible: _isDataAvailable,
+          //   child: TextButton(
+          //     onPressed: () {
+          //       _displayDeletionWarning(context);
+          //     },
+          //     child: const Text(
+          //       'Clear Data',
+          //       style: TextStyle(
+          //         color: Colors.white,
+          //       ),
+          //     ),
+          //   ),
+          // ),
+          PopupMenuButton(
+            itemBuilder: ((ctx) {
+              return const [
+                PopupMenuItem<int>(
+                  value: 0,
+                  child: Text('Clear Data'),
                 ),
-              ),
-            ),
+                PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Change Master Password'),
+                ),
+              ];
+            }),
+            onSelected: (value) async {
+              if (value == 0) {
+                if (_isDataAvailable) {
+                  await _displayDeletionWarning(context);
+                } else {}
+              } else if (value == 1) {
+                await _changeMasterPassword(context);
+              }
+            },
           ),
         ],
       ),
@@ -64,7 +100,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
             ),
           ),
           onTap: () => {
-            _enterMasterPassword(data[index].platform),
+            _enterMasterPassword(platform: data[index].platform),
           },
         );
       },
@@ -139,7 +175,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     );
   }
 
-  _enterMasterPassword(pltfm) {
+  _enterMasterPassword({platform, changeMasterPass = false}) {
     showDialog(
       context: context,
       builder: (ctx1) {
@@ -200,13 +236,19 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    var pwd = await _validatePassword(alertTextController.text,
-                        pltfm); // Why async and await here? Some expert help me figure it out!!!
+                    var pwd = await _validatePassword(
+                      alertTextController.text,
+                    ); // Why async and await here? Some expert help me figure it out!!!
                     setState(() {
                       isPwdCorrect = pwd;
                     });
-                    if (formKey.currentState!.validate() && ctx1.mounted) {
-                      _displayPassword(pltfm, ctx1);
+                    if (changeMasterPass &&
+                        formKey.currentState!.validate() &&
+                        ctx1.mounted) {
+                      _displayPassword(platform, ctx1);
+                    } else {
+                      Navigator.of(ctx1).pop();
+                      const ChangeMasterPassword();
                     }
                   },
                   child: const Text('Submit'),
@@ -219,7 +261,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     );
   }
 
-  _validatePassword(String enteredPassword, String platform) async {
+  _validatePassword(String enteredPassword) async {
     var mPass = await Encryption.masterPassword();
     return (enteredPassword == mPass);
   }
@@ -248,5 +290,10 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         );
       },
     );
+  }
+
+  _changeMasterPassword(BuildContext ctx) async {
+    await Navigator.of(ctx).push(
+        MaterialPageRoute(builder: (ctx1) => const ChangeMasterPassword()));
   }
 }
