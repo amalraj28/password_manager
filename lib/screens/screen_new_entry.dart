@@ -40,8 +40,8 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
       appBar: AppBar(
         title: const Text('New Entry'),
         leading: IconButton(
-          onPressed: () async {
-            await Navigator.of(context).popAndPushNamed('/display_passwords');
+          onPressed: () {
+            Navigator.of(context).pop();
           },
           icon: const Icon(Icons.arrow_back),
         ),

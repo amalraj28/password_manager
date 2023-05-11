@@ -16,9 +16,8 @@ class UpdateEntry extends StatelessWidget {
       appBar: AppBar(
         title: Text('Update details of $platform'),
         leading: IconButton(
-          onPressed: () async {
-            await Navigator.of(context)
-                .pushReplacementNamed('/display_passwords');
+          onPressed: () {
+            Navigator.of(context).pop();
           },
           icon: const Icon(Icons.arrow_back),
         ),

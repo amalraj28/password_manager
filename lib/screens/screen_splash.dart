@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if ((loginStatus == null || loginStatus == false) && context.mounted) {
       _goToLoginPage(context);
     } else {
-      Navigator.of(context).popAndPushNamed('/main');
+      Navigator.of(context).popAndPushNamed('/display_passwords');
     }
   }
 }

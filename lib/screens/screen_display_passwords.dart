@@ -4,6 +4,8 @@ import 'package:password_manager/db/database.dart';
 import 'package:password_manager/encryption/encryption.dart';
 import 'package:password_manager/screens/screen_change_entry.dart';
 import 'package:password_manager/screens/screen_change_master_pass.dart';
+import 'package:password_manager/screens/screen_login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 late bool _isDataAvailable;
 
@@ -25,7 +27,9 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await Navigator.of(context).pushReplacementNamed('/create_entry');
+          await Navigator.of(context)
+              .pushNamed('/create_entry')
+              .then((_) => setState(() {}));
         },
         foregroundColor: Colors.white,
         backgroundColor: Colors.green,
@@ -43,40 +47,36 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         ),
         title: const Text('Passwords Stored'),
         actions: [
-          // Visibility(
-          //   visible: _isDataAvailable,
-          //   child: TextButton(
-          //     onPressed: () {
-          //       _displayDeletionWarning(context);
-          //     },
-          //     child: const Text(
-          //       'Clear Data',
-          //       style: TextStyle(
-          //         color: Colors.white,
-          //       ),
-          //     ),
-          //   ),
-          // ),
           PopupMenuButton(
             itemBuilder: ((ctx) {
               return const [
-                PopupMenuItem<int>(
-                  value: 0,
+                PopupMenuItem(
+                  value: 'clear',
                   child: Text('Clear Data'),
                 ),
-                PopupMenuItem<int>(
-                  value: 1,
+                PopupMenuItem(
+                  value: 'masterPassword',
                   child: Text('Change Master Password'),
+                ),
+                PopupMenuItem(
+                  value: 'logout',
+                  child: Text('Logout'),
                 ),
               ];
             }),
             onSelected: (value) async {
-              if (value == 0) {
-                if (_isDataAvailable) {
-                  await _displayDeletionWarning(context);
-                } else {}
-              } else if (value == 1) {
-                await _changeMasterPassword(context);
+              switch (value) {
+                case 'clear':
+                  if (_isDataAvailable) {
+                    await _displayDeletionWarning(context);
+                  }
+                  break;
+                case 'masterPassword':
+                  await _changeMasterPassword(context);
+                  break;
+                case 'logout':
+                  _logout(context);
+                  break;
               }
             },
           ),
@@ -84,6 +84,17 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
       ),
       body: _isDataAvailable ? _displayList() : _noDataScreen(),
     );
+  }
+
+  void _logout(BuildContext ctx) async {
+    final sharedPrefs = await SharedPreferences.getInstance();
+    await sharedPrefs.clear();
+    if (ctx.mounted) {
+      await Navigator.of(ctx).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (ctx1) => LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 
   _displayList() {
@@ -276,31 +287,102 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     Navigator.of(ctx).pop();
 
     var pwd = await Encryption.getDecryptedPassword(platform);
+    var username =
+        await UserDatabase.findItemFromDb(key: platform)[0]['username'];
+
+    bool userNameCopied = false;
+    bool passwordCopied = false;
 
     // ignore: use_build_context_synchronously
     return showDialog(
       context: context,
       builder: (ctx1) {
-        return AlertDialog(
-          title: const Text('Password'),
-          content: Text('Password:\n$pwd'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                FlutterClipboard.copy(pwd);
-                Navigator.of(ctx1).pop();
-              },
-              child: const Text('COPY'),
-            )
-          ],
+        return StatefulBuilder(
+          builder: (ctx1, setState) {
+            return AlertDialog(
+              title: Text('$platform'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Username:\n $username',
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          await FlutterClipboard.copy(username);
+                          setState(() {
+                            userNameCopied = true;
+                            passwordCopied = false;
+                          });
+                        },
+                        icon: const Icon(Icons.copy),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Password:\n$pwd'),
+                      IconButton(
+                        onPressed: () async {
+                          await FlutterClipboard.copy(pwd);
+                          setState(() {
+                            passwordCopied = true;
+                            userNameCopied = false;
+                          });
+                        },
+                        icon: const Icon(Icons.copy),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Visibility(
+                    visible: userNameCopied,
+                    child: const Text(
+                      'Username copied to clipboard',
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: passwordCopied,
+                    child: const Text(
+                      'Password copied to clipboard',
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx1).pop();
+                  },
+                  child: const Text('Close'),
+                )
+              ],
+            );
+          },
         );
       },
     );
   }
 
   _changeMasterPassword(BuildContext ctx) async {
-    await Navigator.of(ctx).push(
-        MaterialPageRoute(builder: (ctx1) => const ChangeMasterPassword()));
+    await Navigator.of(ctx)
+        .push(
+            MaterialPageRoute(builder: (ctx1) => const ChangeMasterPassword()))
+        .then((_) => setState(() {}));
   }
 
   // Function to get the tap position
@@ -334,9 +416,13 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
 
     if (result == 0) {
       // ignore: use_build_context_synchronously
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (ctx1) => UpdateEntry(platform: platform)),
-      );
+      await Navigator.of(context)
+          .push(
+            MaterialPageRoute(
+              builder: (ctx1) => UpdateEntry(platform: platform),
+            ),
+          )
+          .then((_) => setState(() {}));
     }
   }
 }
