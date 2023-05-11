@@ -2,6 +2,7 @@ import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:password_manager/db/database.dart';
 import 'package:password_manager/encryption/encryption.dart';
+import 'package:password_manager/screens/screen_change_entry.dart';
 import 'package:password_manager/screens/screen_change_master_pass.dart';
 
 late bool _isDataAvailable;
@@ -13,6 +14,8 @@ class DisplayPasswords extends StatefulWidget {
 }
 
 class _DisplayPasswordsState extends State<DisplayPasswords> {
+  Offset _tapPosition = Offset.zero;
+
   @override
   Widget build(BuildContext context) {
     setState(() {
@@ -22,7 +25,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await Navigator.of(context).pushNamed('/create_entry');
+          await Navigator.of(context).pushReplacementNamed('/create_entry');
         },
         foregroundColor: Colors.white,
         backgroundColor: Colors.green,
@@ -87,21 +90,29 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     var data = UserDatabase.getData();
     return ListView.separated(
       itemBuilder: (ctx, index) {
-        return ListTile(
-          title: Text(data[index].platform),
-          subtitle: Text(data[index].username),
-          trailing: IconButton(
-            onPressed: () {
-              _deleteFromDatabase(data[index].platform, ctx);
-            },
-            icon: const Icon(
-              Icons.delete_rounded,
-              color: Colors.redAccent,
-            ),
-          ),
-          onTap: () => {
-            _enterMasterPassword(platform: data[index].platform),
+        return GestureDetector(
+          onTapDown: (details) {
+            _getTapPosition(details);
           },
+          child: ListTile(
+            title: Text(data[index].platform),
+            onLongPress: () {
+              _showMenu(ctx, data[index].platform);
+            },
+            subtitle: Text(data[index].username),
+            trailing: IconButton(
+              onPressed: () {
+                _deleteFromDatabase(data[index].platform, ctx);
+              },
+              icon: const Icon(
+                Icons.delete_rounded,
+                color: Colors.redAccent,
+              ),
+            ),
+            onTap: () => {
+              _enterMasterPassword(data[index].platform),
+            },
+          ),
         );
       },
       separatorBuilder: (ctx, index) => const Divider(),
@@ -175,7 +186,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     );
   }
 
-  _enterMasterPassword({platform, changeMasterPass = false}) {
+  _enterMasterPassword(platform) {
     showDialog(
       context: context,
       builder: (ctx1) {
@@ -242,13 +253,8 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
                     setState(() {
                       isPwdCorrect = pwd;
                     });
-                    if (changeMasterPass &&
-                        formKey.currentState!.validate() &&
-                        ctx1.mounted) {
+                    if (formKey.currentState!.validate() && ctx1.mounted) {
                       _displayPassword(platform, ctx1);
-                    } else {
-                      Navigator.of(ctx1).pop();
-                      const ChangeMasterPassword();
                     }
                   },
                   child: const Text('Submit'),
@@ -295,5 +301,42 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
   _changeMasterPassword(BuildContext ctx) async {
     await Navigator.of(ctx).push(
         MaterialPageRoute(builder: (ctx1) => const ChangeMasterPassword()));
+  }
+
+  // Function to get the tap position
+  void _getTapPosition(TapDownDetails details) {
+    final RenderBox referenceBox = context.findRenderObject() as RenderBox;
+    setState(() {
+      _tapPosition = referenceBox.globalToLocal(details.globalPosition);
+    });
+  }
+
+  _showMenu(ctx, platform) async {
+    // Get position of tap down
+    final RenderObject? overlay =
+        Overlay.of(context).context.findRenderObject();
+
+    final result = await showMenu(
+      context: ctx,
+      // Set the position of the tap down menu
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 30, 30),
+        Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width,
+            overlay.paintBounds.size.height),
+      ),
+      items: [
+        const PopupMenuItem(
+          value: 0,
+          child: Text('Update'),
+        ),
+      ],
+    );
+
+    if (result == 0) {
+      // ignore: use_build_context_synchronously
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (ctx1) => UpdateEntry(platform: platform)),
+      );
+    }
   }
 }
