@@ -1,3 +1,4 @@
+import 'package:password_manager/encryption/encryption.dart';
 import 'package:password_manager/models/data_models.dart';
 import 'package:realm/realm.dart';
 
@@ -94,6 +95,30 @@ class UserDatabase {
       realm.delete<PasswordSalt>(metaData);
     });
 
+    realm.close();
+  }
+
+  static updateItem(platform, String username, String password) async {
+    var realm = _openDatabase();
+    var userData = realm.find<DataModel>(platform)!;
+    var metaData = realm.find<PasswordSalt>(platform)!;
+
+    if (password.isNotEmpty) {
+      var newPassData = await Encryption.encryptText(password);
+      var newEncryptedPass = newPassData[0];
+      var newSalt = newPassData[1];
+      var newIV = newPassData[2];
+
+      realm.write(() {
+        userData.password = newEncryptedPass.base64;
+        metaData.salt = newSalt;
+        metaData.iv = newIV.base64;
+      });
+    }
+
+    if (username.isNotEmpty) {
+      realm.write(() => userData.username = username);
+    }
     realm.close();
   }
 }
