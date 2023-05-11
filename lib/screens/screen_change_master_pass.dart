@@ -24,6 +24,15 @@ class ChangeMasterPassword extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Text(
+              'Please note that if you change master password, the current entries in the database can\'t be accessed, unless you change back to initial master password!!!',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 50),
             Form(
               key: formKey,
               child: TextFormField(

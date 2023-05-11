@@ -242,8 +242,17 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
     _duplicatePlatform = await UserDatabase.addData(
         data: userData, encryptionMetadata: pwdMetadata);
 
-    if (_duplicatePlatform) {
-      // Error correction has to be written here
+    if (_duplicatePlatform && ctx.mounted) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Website or platform entered is already present in the database.',
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
     } else if (ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(

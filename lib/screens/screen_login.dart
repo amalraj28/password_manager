@@ -10,21 +10,43 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool obscured = true;
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Login'),
+          title: const Text('Login / Setup Master Password'),
         ),
         body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextFormField(
-                obscureText: true,
-                controller: _pwdController,
-                decoration: const InputDecoration(
-                  label: Text('Password'),
-                  border: OutlineInputBorder(),
-                  hintText: 'Password',
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    return TextFormField(
+                      obscureText: obscured,
+                      controller: _pwdController,
+                      decoration: InputDecoration(
+                        label: const Text('Password'),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(
+                              () {
+                                obscured = !obscured;
+                              },
+                            );
+                          },
+                          icon: Icon(
+                            obscured
+                                ? Icons.visibility_sharp
+                                : Icons.visibility_off_sharp,
+                          ),
+                        ),
+                        border: const OutlineInputBorder(),
+                        hintText: 'Password',
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 10),
@@ -57,10 +79,10 @@ class LoginScreen extends StatelessWidget {
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool(LOGIN_STATUS, true);
       if (ctx.mounted) {
-        Navigator.of(ctx).popAndPushNamed('/main');
+        await Navigator.of(ctx).popAndPushNamed('/display_passwords');
       }
       _pwdController.clear();
-    } else {
+    } else if (ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(
           content: Text(wrongPassword),

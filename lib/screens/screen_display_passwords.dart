@@ -39,12 +39,6 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         ),
       ),
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
         title: const Text('Passwords Stored'),
         actions: [
           PopupMenuButton(
