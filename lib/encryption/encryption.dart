@@ -21,6 +21,38 @@ class Encryption {
     return salt;
   }
 
+  // static _generateKey(String password, List<int> salt) async {
+  //   final pbkdf2 = Pbkdf2.hmacSha256(iterations: 10000, bits: 256);
+  //   final secretKey =
+  //       await pbkdf2.deriveKeyFromPassword(password: password, nonce: salt);
+  //   return secretKey;
+  // }
+
+  // static encryptUsingAES(text) async {
+  //   // Define algorithm
+  //   final algorithm = AesCbc.with256bits(macAlgorithm: Hmac.sha256());
+
+  //   // Derive list of integers as salt
+  //   final salt = List<int>.generate(128, (_) => Random.secure().nextInt(128));
+
+  //   //Get the master password
+  //   final masterPass = await Encryption.secureStorage.read(key: 'key');
+
+  //   // Use salt and master password to generate key
+  //   final secretKey = await _generateKey(masterPass!, salt);
+
+  //   //Encrypt the string
+  //   var encrypted = await algorithm.encryptString(text, secretKey: secretKey);
+
+  //   // Get encrypted stream as string
+  //   var encryptionAsString = String.fromCharCodes(encrypted.cipherText);
+
+  //   // Convert list of int to string
+  //   String saltAsString = String.fromCharCodes(salt);
+
+  //   return [encryptionAsString, saltAsString];
+  // }
+
   static encryptText(text) async {
     var masterPass = await _getMasterPassword();
     var salt = await _generateRandomSalt(32 - masterPass.length);
