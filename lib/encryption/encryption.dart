@@ -86,8 +86,12 @@ class Encryption {
 
     // Decrypt password
     Encrypter encrypter = Encrypter(AES(key, mode: AESMode.cbc));
-    var pwd = encrypter.decrypt(encryptPass, iv: iv);
-    return pwd;
+    try {
+      var pwd = encrypter.decrypt(encryptPass, iv: iv);
+      return pwd;
+    } catch (e) {
+      return null;
+    }
   }
 
   static masterPassword() async {

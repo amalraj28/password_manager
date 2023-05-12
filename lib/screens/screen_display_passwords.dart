@@ -281,6 +281,18 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
     Navigator.of(ctx).pop();
 
     var pwd = await Encryption.getDecryptedPassword(platform);
+
+    if (pwd == null && context.mounted) {
+      return ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Enter previous master password',
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
     var username =
         await UserDatabase.findItemFromDb(key: platform)[0]['username'];
 
