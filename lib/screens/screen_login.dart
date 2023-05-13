@@ -75,13 +75,20 @@ class LoginScreen extends StatelessWidget {
           backgroundColor: Colors.red,
         ),
       );
+    } else if (await _checkIfFirstTime()) {
+      var storage = Encryption.secureStorage;
+      await storage.write(key: 'key', value: pwd);
+      final sharedPrefs = await SharedPreferences.getInstance();
+      await sharedPrefs.setBool(LOGIN_STATUS, true);
+      if (ctx.mounted) {
+        await Navigator.of(ctx).popAndPushNamed('/display_passwords');
+      }
     } else if (await _validateMasterPassword(_pwdController.text)) {
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool(LOGIN_STATUS, true);
       if (ctx.mounted) {
         await Navigator.of(ctx).popAndPushNamed('/display_passwords');
       }
-      _pwdController.clear();
     } else if (ctx.mounted) {
       ScaffoldMessenger.of(ctx).showSnackBar(
         const SnackBar(
@@ -98,5 +105,11 @@ class LoginScreen extends StatelessWidget {
 
     if (await storage.read(key: 'key') == text) return true;
     return false;
+  }
+
+  _checkIfFirstTime() async {
+    var storage = Encryption.secureStorage;
+    if (await storage.containsKey(key: 'key')) return false;
+    return true;
   }
 }
