@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager/main.dart';
+import 'package:password_manager/screens/screen_bio_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -30,16 +31,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: Image.asset(
-        'assets/images/image.webp',
-        height: 300,
+      body: Center(
+        child: Image.asset(
+          'assets/images/image.webp',
+          height: 300,
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _goToLoginPage(BuildContext context) async {
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     if (context.mounted) {
       Navigator.of(context).popAndPushNamed('/login');
     }
@@ -49,10 +51,17 @@ class _SplashScreenState extends State<SplashScreen> {
     final sharedPrefs = await SharedPreferences.getInstance();
     final loginStatus = sharedPrefs.getBool(LOGIN_STATUS);
 
-    if ((loginStatus == null || loginStatus == false) && context.mounted) {
-      _goToLoginPage(context);
-    } else {
-      Navigator.of(context).popAndPushNamed('/display_passwords');
+    while (true) {
+      if (await BiometricAuthScreen.authenticate()) {
+        if (loginStatus == null || loginStatus == false) {
+          _goToLoginPage(context);
+        } else {
+          await Navigator.of(context).popAndPushNamed('/display_passwords');
+        }
+        break;
+      } /*else {*/
+      // continue;
+      // }
     }
   }
 }
