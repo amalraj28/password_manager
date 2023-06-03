@@ -1,5 +1,6 @@
 import 'package:password_manager/encryption/encryption.dart';
 import 'package:password_manager/models/data_models.dart';
+import 'package:password_manager/scripts/realm_to_non_realm.dart';
 import 'package:realm/realm.dart';
 
 class UserDatabase {
@@ -34,53 +35,55 @@ class UserDatabase {
 
   static void clearData() async {
     var realm = _openDatabase();
-    await Future.sync(() {
-      realm.write(() {
-        realm.deleteAll<DataModel>();
-        realm.deleteAll<PasswordSalt>();
-      });
+    realm.write(() {
+      realm.deleteAll<DataModel>();
+      realm.deleteAll<PasswordSalt>();
     });
     realm.close();
   }
 
-  static getData() {
+  static List<List<Map<String, String>>> getData() {
     Realm realm = _openDatabase();
-    var items = realm.all<DataModel>();
-    return items;
-  }
+    var userData = realm.all<DataModel>();
+    var metaData = realm.all<PasswordSalt>();
 
-  static checkIfDataPresent() {
-    var items = UserDatabase.getData();
-    if (items.isEmpty) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  static findItemFromDb({required String key}) {
-    Realm realm = _openDatabase();
-    var data = realm.find<DataModel>(key);
-    var metaData = realm.find<PasswordSalt>(key);
-    var userData = Map.identity();
-    var userMetaData = Map.identity();
-    if (data != null) {
-      userData = {
-        'platform': data.platform,
-        'username': data.username,
-        'password': data.password
-      };
+    if (userData.length != metaData.length) {
+      throw Exception(
+        'Error in stored data. Metadata and userdata are not equal in number',
+      );
     }
 
-    if (metaData != null) {
-      userMetaData = {
-        'platform': metaData.platform,
-        'salt': metaData.salt,
-        'iv': metaData.iv
-      };
+    List<List<Map<String, String>>> data = [];
+
+    for (int i = 0; i < userData.length; i++) {
+      var userDataMap = createObjectMapping(userData[i]);
+      var metaDataMap = createObjectMapping(metaData[i]);
+
+      data.add([userDataMap, metaDataMap]);
     }
+
     realm.close();
-    return [userData, userMetaData];
+    return data;
+  }
+
+  static bool checkIfDataPresent() {
+    var items = UserDatabase.getData();
+
+    return items.isNotEmpty;
+  }
+
+  static List<Map<String, String>> findItemFromDb({required String key}) {
+    Realm realm = _openDatabase();
+    var userData = realm.find<DataModel>(key);
+    var metaData = realm.find<PasswordSalt>(key);
+
+    if (userData != null && metaData != null) {
+      return [createObjectMapping(userData), createObjectMapping(metaData)];
+    } else {
+      throw Exception(
+        'Error in function: findItemFromDb -> Item not found in database',
+      );
+    }
   }
 
   static deleteItemFromDb(key) {
@@ -100,8 +103,10 @@ class UserDatabase {
 
   static updateItem(platform, String username, String password) async {
     var realm = _openDatabase();
-    var userData = realm.find<DataModel>(platform)!;
-    var metaData = realm.find<PasswordSalt>(platform)!;
+    var userData = realm.find<DataModel>(platform);
+    var metaData = realm.find<PasswordSalt>(platform);
+
+    if (userData == null || metaData == null) return;
 
     if (password.isNotEmpty) {
       var newPassData = await Encryption.encryptText(password);
@@ -121,4 +126,6 @@ class UserDatabase {
     }
     realm.close();
   }
+
+  static updateMasterPassword() {}
 }

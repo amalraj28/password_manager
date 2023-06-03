@@ -100,14 +100,14 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
             _getTapPosition(details);
           },
           child: ListTile(
-            title: Text(data[index].platform),
+            title: Text(data[index][0]['platform']!),
             onLongPress: () {
-              _showMenu(ctx, data[index].platform);
+              _showMenu(ctx, data[index][0]['platform']!);
             },
-            subtitle: Text(data[index].username),
+            subtitle: Text(data[index][0]['username']!),
             trailing: IconButton(
               onPressed: () {
-                _deleteFromDatabase(data[index].platform, ctx);
+                _deleteFromDatabase(data[index][0]['platform']!, ctx);
               },
               icon: const Icon(
                 Icons.delete_rounded,
@@ -115,7 +115,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
               ),
             ),
             onTap: () => {
-              _enterMasterPassword(data[index].platform),
+              _enterMasterPassword(data[index][0]['platform']!),
             },
           ),
         );
@@ -145,7 +145,8 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         return AlertDialog(
           title: const Text('Warning!!!'),
           content: const Text(
-              'This will delete all user data from the database. Do you wish to continue?'),
+            'This will delete all user data from the database. Do you wish to continue?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx1).pop(),
@@ -282,19 +283,18 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
 
     var pwd = await Encryption.getDecryptedPassword(platform);
 
-    if (pwd == null && context.mounted) {
-      return ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Enter previous master password',
-          ),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 1),
-        ),
-      );
-    }
-    var username =
-        await UserDatabase.findItemFromDb(key: platform)[0]['username'];
+    // if (pwd == null && context.mounted) {
+    //   return ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text(
+    //         'Enter previous master password',
+    //       ),
+    //       backgroundColor: Colors.red,
+    //       duration: Duration(seconds: 1),
+    //     ),
+    //   );
+    // }
+    var username = UserDatabase.findItemFromDb(key: platform)[0]['username']!;
 
     bool userNameCopied = false;
     bool passwordCopied = false;

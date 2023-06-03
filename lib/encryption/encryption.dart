@@ -72,14 +72,20 @@ class Encryption {
     var metaData = data[1];
 
     // Get salt and iv from metadata
-    String salt = metaData['salt'];
-    IV iv = IV.fromBase64(metaData['iv']);
+    String salt = metaData['salt'] ?? '';
+    IV iv = IV.fromBase64(metaData['iv'] ?? '');
 
     // Get encrypted password from userData
-    var encryptPass = Encrypted.fromBase64(userData['password']);
+    var encryptPass = Encrypted.fromBase64(userData['password'] ?? '');
 
     // Get master Password
     String masterPass = await _getMasterPassword();
+
+    if (salt.isEmpty || iv.base64.isEmpty || encryptPass.base64.isEmpty) {
+      throw Exception(
+        'Error in getDecryptedPassword function -> The value obtained from database is null',
+      );
+    }
 
     // Get key
     Key key = Key.fromUtf8('$masterPass$salt');
@@ -87,10 +93,9 @@ class Encryption {
     // Decrypt password
     Encrypter encrypter = Encrypter(AES(key, mode: AESMode.cbc));
     try {
-      var pwd = encrypter.decrypt(encryptPass, iv: iv);
-      return pwd;
+      return encrypter.decrypt(encryptPass, iv: iv);
     } catch (e) {
-      return null;
+      // How to handle this?
     }
   }
 
