@@ -63,7 +63,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   void _actionOnButtonPressed(BuildContext ctx) async {
-    final pwd = _pwdController.text;
+    final pwd = _pwdController.text.trim();
     const emptyFields = 'One or more fields are empty';
     const wrongPassword = 'Wrong password. Please try again';
 
@@ -83,7 +83,7 @@ class LoginScreen extends StatelessWidget {
       if (ctx.mounted) {
         await Navigator.of(ctx).popAndPushNamed('/display_passwords');
       }
-    } else if (await _validateMasterPassword(_pwdController.text)) {
+    } else if (await _validateMasterPassword(_pwdController.text.trim())) {
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool(LOGIN_STATUS, true);
       if (ctx.mounted) {

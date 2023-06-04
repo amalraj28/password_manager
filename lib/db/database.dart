@@ -78,6 +78,7 @@ class UserDatabase {
     var metaData = realm.find<PasswordSalt>(key);
 
     if (userData != null && metaData != null) {
+      // realm.close();
       return [createObjectMapping(userData), createObjectMapping(metaData)];
     } else {
       throw Exception(
@@ -126,6 +127,4 @@ class UserDatabase {
     }
     realm.close();
   }
-
-  static updateMasterPassword() {}
 }

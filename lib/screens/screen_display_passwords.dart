@@ -254,8 +254,8 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
                 TextButton(
                   onPressed: () async {
                     var pwd = await _validatePassword(
-                      alertTextController.text,
-                    ); // Why async and await here? Some expert help me figure it out!!!
+                      alertTextController.text.trim(),
+                    );
                     setState(() {
                       isPwdCorrect = pwd;
                     });
@@ -283,17 +283,6 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
 
     var pwd = await Encryption.getDecryptedPassword(platform);
 
-    // if (pwd == null && context.mounted) {
-    //   return ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text(
-    //         'Enter previous master password',
-    //       ),
-    //       backgroundColor: Colors.red,
-    //       duration: Duration(seconds: 1),
-    //     ),
-    //   );
-    // }
     var username = UserDatabase.findItemFromDb(key: platform)[0]['username']!;
 
     bool userNameCopied = false;
@@ -314,7 +303,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Username:\n $username',
+                        'Username:\n$username',
                       ),
                       IconButton(
                         onPressed: () async {

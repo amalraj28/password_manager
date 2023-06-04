@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:password_manager/encryption/encryption.dart';
 
@@ -6,6 +8,7 @@ class ChangeMasterPassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool obscured = true;
     final currentMPassController = TextEditingController();
     final newMPassController = TextEditingController();
     final formKey = GlobalKey<FormFieldState>();
@@ -24,36 +27,57 @@ class ChangeMasterPassword extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Please note that if you change master password, the current entries in the database can\'t be accessed, unless you change back to initial master password!!!',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-              ),
-            ),
-            const SizedBox(height: 50),
             Form(
               key: formKey,
-              child: TextFormField(
-                obscureText: true,
-                controller: currentMPassController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Current Master Password',
-                ),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return TextFormField(
+                    obscureText: obscured,
+                    controller: currentMPassController,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: 'Current Master Password',
+                      suffixIcon: IconButton(
+                        onPressed: () => setState(() {
+                          obscured = !obscured;
+                        }),
+                        icon: Icon(
+                          obscured
+                              ? Icons.visibility_rounded
+                              : Icons.visibility_off_rounded,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(
               height: 20,
             ),
-            TextFormField(
-              obscureText: true,
-              controller: newMPassController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'New Master Password',
-              ),
+            StatefulBuilder(
+              builder: (context, setState) {
+                return TextFormField(
+                  obscureText: obscured,
+                  controller: newMPassController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: 'New Master Password',
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          obscured = !obscured;
+                        });
+                      },
+                      icon: Icon(
+                        obscured
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             Row(
@@ -84,16 +108,16 @@ class ChangeMasterPassword extends StatelessWidget {
     return (enteredPassword == mPass);
   }
 
-  _updateMPass(newPass, context) async {
-    var storage = Encryption.secureStorage;
-    storage.delete(key: 'key');
-    storage.write(key: 'key', value: newPass);
-
+  _updateMPass(String newPass, context) async {
+    bool updated = newPass.isEmpty ? await Encryption.updateMasterPassword(newMasterPassword: newPass) : false;
+  
     return ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Master Password updated successfully'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: updated
+            ? const Text('Master Password updated successfully')
+            : const Text('Failed to update :('),
+        backgroundColor: updated ? Colors.green : Colors.red,
+        duration: const Duration(seconds: 2),
       ),
     );
   }

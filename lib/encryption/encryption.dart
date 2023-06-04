@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:password_manager/db/database.dart';
+import 'package:password_manager/models/data_models.dart';
 
 class Encryption {
   // ignore: prefer_const_constructors
@@ -65,7 +66,7 @@ class Encryption {
     return [encrypted, salt, iv];
   }
 
-  static getDecryptedPassword(String platform) async {
+  static Future<String> getDecryptedPassword(String platform) async {
     // Get entry from database
     var data = UserDatabase.findItemFromDb(key: platform);
     var userData = data[0];
@@ -92,14 +93,84 @@ class Encryption {
 
     // Decrypt password
     Encrypter encrypter = Encrypter(AES(key, mode: AESMode.cbc));
-    try {
-      return encrypter.decrypt(encryptPass, iv: iv);
-    } catch (e) {
-      // How to handle this?
-    }
+    return encrypter.decrypt(encryptPass, iv: iv);
   }
 
   static masterPassword() async {
     return _getMasterPassword();
+  }
+
+  static Future<bool> updateMasterPassword(
+      {required String newMasterPassword}) async {
+    var storage = Encryption.secureStorage;
+    String oldMasterPassword = await masterPassword();
+
+    if (oldMasterPassword == '') {
+      return false;
+    }
+
+    // Check if data is present
+    bool dataIsPresent = UserDatabase.checkIfDataPresent();
+
+    // if data is not present, simply update master password
+    if (!dataIsPresent) {
+      Encryption.secureStorage.write(key: 'key', value: newMasterPassword);
+      print('hii');
+      return true;
+    }
+
+    // else update master password for each entry
+    // 1). Get all data in database
+    var database = UserDatabase.getData();
+    int flag = 0; // To know if for loop successfully or not
+
+    // 2). For each entry, get old password
+    for (var data in database) {
+      flag++;
+      var userData = data[0];
+      var metaData = data[1];
+
+      var platform = userData['platform'];
+      var username = userData['username'];
+      var salt = metaData['salt'];
+      var iv = metaData['iv'];
+
+      if (platform == null || username == null || salt == null || iv == null) {
+        throw ArgumentError(
+          ['Error in function updateMasterPassword -> Argument is null'],
+        );
+      }
+
+      var userPassword = await getDecryptedPassword(platform);
+
+      // Change to new master password
+      await storage.write(key: 'key', value: newMasterPassword);
+      var newEncryption = await encryptText(userPassword);
+      var newPassword = newEncryption[0].base64;
+      var newSalt = newEncryption[1];
+      var newIV = newEncryption[2].base64;
+
+      // Delete previous data from database
+      UserDatabase.deleteItemFromDb(platform);
+
+      // Add new data to database
+      var newUserData = DataModel(username, newPassword, platform);
+      var newMetaData = PasswordSalt(platform, newSalt, newIV);
+
+      await UserDatabase.addData(
+          data: newUserData, encryptionMetadata: newMetaData);
+
+      // Change master password to old master password for the next data
+      await storage.write(key: 'key', value: oldMasterPassword);
+    }
+
+    bool status = flag == database.length;
+    print(status);
+
+    if (status) {
+      await storage.write(key: 'key', value: newMasterPassword);
+    }
+
+    return status;
   }
 }

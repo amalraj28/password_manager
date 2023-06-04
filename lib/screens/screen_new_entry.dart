@@ -165,9 +165,9 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
               children: [
                 const Text('The following data was entered: '),
                 const SizedBox(height: 5.0),
-                Text('Platform: ${_platformController.text}'),
-                Text('Username: ${_usernameController.text}'),
-                Text('Password: ${_passwordController.text}'),
+                Text('Platform: ${_platformController.text.trim()}'),
+                Text('Username: ${_usernameController.text.trim()}'),
+                Text('Password: ${_passwordController.text.trim()}'),
                 const SizedBox(height: 5.0),
                 const Text('Do you wish to save this data?')
               ],
@@ -227,10 +227,10 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
   }
 
   _savedSuccess(BuildContext ctx) async {
-    final user = _usernameController.text;
-    final platform = _platformController.text.toUpperCase();
+    final user = _usernameController.text.trim();
+    final platform = _platformController.text.trim().toUpperCase();
 
-    var encryptedData = await Encryption.encryptText(_passwordController.text);
+    var encryptedData = await Encryption.encryptText(_passwordController.text.trim());
 
     final encryptedPassword = encryptedData[0].base64;
     final salt = encryptedData[1];
@@ -265,15 +265,11 @@ class _CreateNewEntryState extends State<CreateNewEntry> {
   }
 
   bool _dataInAllFields() {
-    final pwd = _passwordController.text;
-    final username = _usernameController.text;
-    final platform = _platformController.text;
+    final pwd = _passwordController.text.trim();
+    final username = _usernameController.text.trim();
+    final platform = _platformController.text.trim();
 
-    if (pwd.isNotEmpty && username.isNotEmpty && platform.isNotEmpty) {
-      return true;
-    } else {
-      return false;
-    }
+    return pwd.isNotEmpty && username.isNotEmpty && platform.isNotEmpty;
   }
 
   void _generatePasswordButtonExecution(BuildContext ctx) {
