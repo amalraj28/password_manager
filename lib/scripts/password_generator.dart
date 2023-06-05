@@ -38,7 +38,7 @@ String generatePassword() {
   int minAlphabets = 8, maxAlphabets = 10;
   int minNumbers = 4, maxNumbers = 7;
 
-  var random = Random();
+  var random = Random.secure();
   int symbolCount = random.nextInt(maxSymbol - minSymbol + 1) + minSymbol;
   int alphabetCount =
       random.nextInt(maxAlphabets - minAlphabets + 1) + minAlphabets;
@@ -48,9 +48,10 @@ String generatePassword() {
   alphabets.shuffle();
   numbers.shuffle();
 
-  List<String> finalPassword = symbols.sublist(0, symbolCount);
-  finalPassword.addAll(alphabets.sublist(0, alphabetCount));
-  finalPassword.addAll(numbers.sublist(0, numbersCount));
+  List<String> finalPassword = symbols.sublist(0, symbolCount) +
+      alphabets.sublist(0, alphabetCount) +
+      numbers.sublist(0, numbersCount);
+
   finalPassword.shuffle();
 
   return finalPassword.join();
