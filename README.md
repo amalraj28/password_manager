@@ -1,5 +1,5 @@
 # password_manager
-A project to manage passwords of user across different websites. Stores the user data in a text file. It can also generate password if needed.
+This branch consists of a Python program to manage passwords of user across different websites. The user data is stored in a text file. It can also generate password if needed.
 
 The project uses `Tkinter` module to create user interface. Once the user enters the required data and clicks `Add` button, a pop-up message for confirmation comes up. Upon confirmation, the data is saved in a txt file (here it's `passwords.txt`).
 
