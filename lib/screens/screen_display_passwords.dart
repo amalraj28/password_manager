@@ -94,6 +94,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
   _displayList() {
     var data = UserDatabase.getData();
     return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 60),
       itemBuilder: (ctx, index) {
         return GestureDetector(
           onTapDown: (details) {
