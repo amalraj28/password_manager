@@ -115,7 +115,6 @@ class Encryption {
     // if data is not present, simply update master password
     if (!dataIsPresent) {
       Encryption.secureStorage.write(key: 'key', value: newMasterPassword);
-      print('hii');
       return true;
     }
 
@@ -165,7 +164,6 @@ class Encryption {
     }
 
     bool status = flag == database.length;
-    print(status);
 
     if (status) {
       await storage.write(key: 'key', value: newMasterPassword);

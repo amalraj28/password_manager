@@ -109,8 +109,9 @@ class ChangeMasterPassword extends StatelessWidget {
   }
 
   _updateMPass(String newPass, context) async {
-    bool updated = newPass.isEmpty ? await Encryption.updateMasterPassword(newMasterPassword: newPass) : false;
-  
+    bool updated = newPass.isNotEmpty
+        ? await Encryption.updateMasterPassword(newMasterPassword: newPass)
+        : false;
     return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: updated
