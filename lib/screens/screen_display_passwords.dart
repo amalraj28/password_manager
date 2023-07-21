@@ -295,6 +295,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         return StatefulBuilder(
           builder: (ctx1, setState) {
             return AlertDialog(
+              scrollable: true,
               title: Text('$platform'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -302,8 +303,12 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Username:\n$username',
+                      Flexible(
+                        // This is to show the overflowing content (if any on a new line)
+                        child: Text(
+                          'Username:\n$username',
+                          overflow: TextOverflow.visible,
+                        ),
                       ),
                       IconButton(
                         onPressed: () async {
@@ -320,7 +325,12 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Password:\n$pwd'),
+                      Flexible(
+                        child: Text(
+                          'Password:\n$pwd',
+                          overflow: TextOverflow.visible,
+                        ),
+                      ),
                       IconButton(
                         onPressed: () async {
                           await FlutterClipboard.copy(pwd);
