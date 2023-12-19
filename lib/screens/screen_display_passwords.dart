@@ -39,6 +39,7 @@ class _DisplayPasswordsState extends State<DisplayPasswords> {
         ),
       ),
       appBar: AppBar(
+        // backgroundColor: Colors.blue,
         title: const Text('Passwords Stored'),
         actions: [
           PopupMenuButton(

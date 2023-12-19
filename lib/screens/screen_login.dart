@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager/encryption/encryption.dart';
+import 'package:password_manager/functions/functions.dart';
 import 'package:password_manager/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -66,17 +67,20 @@ class LoginScreen extends StatelessWidget {
     final pwd = _pwdController.text.trim();
     const emptyFields = 'One or more fields are empty';
     const wrongPassword = 'Wrong password. Please try again';
+    const tooLong = 'Master Password can have a maximum of 26 characters only';
 
     if (pwd.isEmpty) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(
-          content: Text(emptyFields),
-          padding: EdgeInsets.all(10.0),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } else if (await _checkIfFirstTime()) {
+      getSnackBar(text: emptyFields, color: Colors.red, context: ctx);
+    } 
+    
+    else if (await _checkIfFirstTime()) {
       var storage = Encryption.secureStorage;
+
+      if (pwd.length > 26) {
+        getSnackBar(text: tooLong, color: Colors.red, context: ctx);
+        return;
+      }
+
       await storage.write(key: 'key', value: pwd);
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool(LOGIN_STATUS, true);
@@ -90,26 +94,18 @@ class LoginScreen extends StatelessWidget {
         await Navigator.of(ctx).popAndPushNamed('/display_passwords');
       }
     } else if (ctx.mounted) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(
-          content: Text(wrongPassword),
-          padding: EdgeInsets.all(10.0),
-          backgroundColor: Colors.red,
-        ),
-      );
+      getSnackBar(text: wrongPassword, color: Colors.red, context: ctx);
     }
   }
 
   _validateMasterPassword(text) async {
     var storage = Encryption.secureStorage;
 
-    if (await storage.read(key: 'key') == text) return true;
-    return false;
+    return await storage.read(key: 'key') == text;
   }
 
   _checkIfFirstTime() async {
     var storage = Encryption.secureStorage;
-    if (await storage.containsKey(key: 'key')) return false;
-    return true;
+    return !(await storage.containsKey(key: 'key'));
   }
 }

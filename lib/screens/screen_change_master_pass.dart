@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:password_manager/encryption/encryption.dart';
+import 'package:password_manager/functions/functions.dart';
 
 class ChangeMasterPassword extends StatelessWidget {
   const ChangeMasterPassword({super.key});
@@ -86,7 +87,7 @@ class ChangeMasterPassword extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     if (await _validatePassword(currentMPassController.text)) {
-                      _updateMPass(newMPassController.text, context);
+                      await _updateMPass(newMPassController.text, context);
                       newMPassController.clear();
                       currentMPassController.clear();
                     } else {
@@ -112,14 +113,21 @@ class ChangeMasterPassword extends StatelessWidget {
     bool updated = newPass.isNotEmpty
         ? await Encryption.updateMasterPassword(newMasterPassword: newPass)
         : false;
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: updated
-            ? const Text('Master Password updated successfully')
-            : const Text('Failed to update :('),
-        backgroundColor: updated ? Colors.green : Colors.red,
-        duration: const Duration(seconds: 2),
-      ),
+    // return ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: updated
+    //         ? const Text('Master Password updated successfully')
+    //         : const Text('Failed to update :('),
+    //     backgroundColor: updated ? Colors.green : Colors.red,
+    //     duration: const Duration(seconds: 2),
+    //   ),
+    // );
+    return await getSnackBar(
+      text: updated
+          ? 'Master Password updated successfully'
+          : 'Failed to update :(',
+      color: updated ? Colors.green : Colors.red,
+      context: context,
     );
   }
 
