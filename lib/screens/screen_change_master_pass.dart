@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:password_manager/encryption/encryption.dart';
 import 'package:password_manager/functions/functions.dart';
+import 'package:password_manager/main.dart';
 
 class ChangeMasterPassword extends StatelessWidget {
   const ChangeMasterPassword({super.key});
@@ -86,7 +87,7 @@ class ChangeMasterPassword extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    if (await _validatePassword(currentMPassController.text)) {
+                    if (await _validatePassword(currentMPassController.text) && newMPassController.text.length <= masterPasswordLength) {
                       await _updateMPass(newMPassController.text, context);
                       newMPassController.clear();
                       currentMPassController.clear();
@@ -134,7 +135,7 @@ class ChangeMasterPassword extends StatelessWidget {
   _displayError(context) {
     return ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Incorrect Password'),
+        content: Text('Incorrect Password or New Password is too long'),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 2),
       ),

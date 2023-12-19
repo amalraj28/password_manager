@@ -102,6 +102,7 @@ class Encryption {
 
   static Future<bool> updateMasterPassword(
       {required String newMasterPassword}) async {
+    if (newMasterPassword.length > 26) return false;
     var storage = Encryption.secureStorage;
     String oldMasterPassword = await masterPassword();
 

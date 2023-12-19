@@ -9,6 +9,7 @@ void main() {
 }
 
 const LOGIN_STATUS = 'user_logged_in';
+const masterPasswordLength = 26;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -17,10 +18,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        fontFamily: 'CrimsonText',
-        appBarTheme: const AppBarTheme(color: Colors.pink),
-        useMaterial3: true
-      ),
+          fontFamily: 'CrimsonText',
+          appBarTheme: const AppBarTheme(color: Colors.pink),
+          useMaterial3: true),
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
       routes: {
